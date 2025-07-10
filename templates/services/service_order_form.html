@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}{{ page_title|default:"Service Order Form" }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="modern-card">
+        <div class="modern-card-header">
+            <h1 class="h4 mb-0">{{ page_title|default:"Service Order" }}</h1>
+        </div>
+        <div class="modern-card-body">
+            <form method="post" novalidate>
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                    <div class="modern-alert modern-alert-danger">
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.pk_id_carro.id_for_label }}" class="form-label">
+                            {{ form.pk_id_carro.label }}{% if form.pk_id_carro.field.required %}*{% endif %}
+                        </label>
+                        {% render_field form.pk_id_carro class+="form-select" %}
+                        {% if form.pk_id_carro.help_text %}
+                            <small class="form-text text-muted">{{ form.pk_id_carro.help_text }}</small>
+                        {% endif %}
+                        {% for error in form.pk_id_carro.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.status.id_for_label }}" class="form-label">
+                            {{ form.status.label }}{% if form.status.field.required %}*{% endif %}
+                        </label>
+                        {% render_field form.status class+="form-select" %}
+                        {% if form.status.help_text %}
+                            <small class="form-text text-muted">{{ form.status.help_text }}</small>
+                        {% endif %}
+                        {% for error in form.status.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.data_de_entrada.id_for_label }}" class="form-label">
+                            {{ form.data_de_entrada.label }}{% if form.data_de_entrada.field.required %}*{% endif %}
+                        </label>
+                        {% render_field form.data_de_entrada class+="form-control" type="date" id="id_data_de_entrada" %}
+                        {% if form.data_de_entrada.help_text %}
+                            <small class="form-text text-muted">{{ form.data_de_entrada.help_text }}</small>
+                        {% endif %}
+                        {% for error in form.data_de_entrada.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.data_de_entrega.id_for_label }}" class="form-label">
+                            {{ form.data_de_entrega.label }}{% if form.data_de_entrega.field.required %}*{% endif %}
+                        </label>
+                        {% render_field form.data_de_entrega class+="form-control" type="date" id="id_data_de_entrega" %}
+                        {% if form.data_de_entrega.help_text %}
+                            <small class="form-text text-muted">{{ form.data_de_entrega.help_text }}</small>
+                        {% endif %}
+                        {% for error in form.data_de_entrega.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.orcamento.id_for_label }}" class="form-label">
+                            {{ form.orcamento.label }}{% if form.orcamento.field.required %}*{% endif %}
+                        </label>
+                        {% render_field form.orcamento class+="form-control" placeholder="0" %}
+                        {% if form.orcamento.help_text %}
+                            <small class="form-text text-muted">{{ form.orcamento.help_text }}</small>
+                        {% endif %}
+                        {% for error in form.orcamento.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.quilometragem.id_for_label }}" class="form-label">
+                            {{ form.quilometragem.label }}{% if form.quilometragem.field.required %}*{% endif %}
+                        </label>
+                        {% render_field form.quilometragem class+="form-control" placeholder="0" %}
+                        {% if form.quilometragem.help_text %}
+                            <small class="form-text text-muted">{{ form.quilometragem.help_text }}</small>
+                        {% endif %}
+                        {% for error in form.quilometragem.errors %}
+                            <div class="invalid-feedback d-block">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="{{ form.descricao_problema.id_for_label }}" class="form-label">
+                        {{ form.descricao_problema.label }}{% if form.descricao_problema.field.required %}*{% endif %}
+                    </label>
+                    {% render_field form.descricao_problema class+="form-control" rows="3" %}
+                    {% if form.descricao_problema.help_text %}
+                        <small class="form-text text-muted">{{ form.descricao_problema.help_text }}</small>
+                    {% endif %}
+                    {% for error in form.descricao_problema.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-3">
+                    <label for="{{ form.descricao_concerto.id_for_label }}" class="form-label">
+                        {{ form.descricao_concerto.label }}{% if form.descricao_concerto.field.required %}*{% endif %}
+                    </label>
+                    {% render_field form.descricao_concerto class+="form-control" rows="3" %}
+                    {% if form.descricao_concerto.help_text %}
+                        <small class="form-text text-muted">{{ form.descricao_concerto.help_text }}</small>
+                    {% endif %}
+                    {% for error in form.descricao_concerto.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="mt-4 d-flex justify-content-start">
+                    <button type="submit" class="modern-btn {% if is_create_form %}modern-btn-success{% else %}modern-btn-primary{% endif %} me-2">
+                        <i class="fas {% if is_create_form %}fa-plus{% else %}fa-save{% endif %} me-1"></i> {% if is_create_form %}Create Service Order{% else %}Save Changes{% endif %}
+                    </button>
+                    <a href="{% if object %}{% url 'services:service_order_detail' object.pk %}{% else %}{% url 'services:service_order_list' %}{% endif %}" class="modern-btn modern-btn-secondary">
+                        <i class="fas fa-times me-1"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

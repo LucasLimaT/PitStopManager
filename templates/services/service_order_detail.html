@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Ordem de Serviço #{{ service_order.pk }} - Detalhes{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/inventory.css' %}">
+<link rel="stylesheet" href="{% static 'css/delete-modal.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<div class="container-fluid" style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
+    <!-- Informações da Ordem de Serviço -->
+    <div class="product-info-card">
+        <div class="product-info-header">
+            <h3><i class="fas fa-clipboard-list"></i> Ordem de Serviço #{{ service_order.pk|stringformat:"04d" }}</h3>
+            <div class="header-actions">
+                <a href="{% url 'services:service_order_edit' service_order.pk %}" class="header-action-btn">
+                    <i class="fas fa-edit"></i> Editar
+                </a>
+                <button type="button" class="header-action-btn delete" data-bs-toggle="modal" data-bs-target="#deleteModal"
+                        data-item-id="{{ service_order.pk }}"
+                        data-item-name="Ordem de Serviço #{{ service_order.pk|stringformat:'04d' }} - {{ service_order.pk_id_carro.marca }} {{ service_order.pk_id_carro.modelo }} ({{ service_order.pk_id_carro.placa }})"
+                        data-item-type="Ordem de Serviço">
+                    <i class="fas fa-trash-alt"></i> Excluir
+                </button>
+            </div>
+        </div>
+        <div class="product-info-body">
+            <div class="info-item">
+                <span class="info-label">
+                    <i class="fas fa-info-circle"></i> Status
+                </span>
+                <span class="info-value">
+                    <span class="stock-status 
+                        {% if service_order.status == 'PENDENTE' %}stock-low
+                        {% elif service_order.status == 'EM_ANDAMENTO' %}stock-warning
+                        {% elif service_order.status == 'CONCLUIDA' %}stock-good
+                        {% elif service_order.status == 'ENTREGUE' %}stock-good
+                        {% elif service_order.status == 'CANCELADA' %}stock-out
+                        {% else %}stock-low{% endif %}">
+                        {{ service_order.get_status_display }}
+                    </span>
+                </span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">
+                    <i class="fas fa-calendar-alt"></i> Data de Entrada
+                </span>
+                <span class="info-value">{{ service_order.data_de_entrada|date:"d/m/Y" }}</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">
+                    <i class="fas fa-calendar-check"></i> Data de Entrega
+                </span>
+                <span class="info-value">
+                    {% if service_order.data_de_entrega %}
+                        {{ service_order.data_de_entrega|date:"d/m/Y" }}
+                    {% else %}
+                        <span style="color: #6b7280;">Não definida</span>
+                    {% endif %}
+                </span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">
+                    <i class="fas fa-dollar-sign"></i> Orçamento
+                </span>
+                <span class="info-value" style="color: #059669; font-weight: 700;">R$ {{ service_order.orcamento_reais|floatformat:2 }}</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">
+                    <i class="fas fa-tachometer-alt"></i> Quilometragem
+                </span>
+                <span class="info-value">{{ service_order.quilometragem|floatformat:0 }} km</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Informações do Veículo e Cliente -->
+    <div class="product-info-card" style="margin-top: 2rem;">
+        <div class="product-info-header">
+            <h3><i class="fas fa-car"></i> Veículo & Cliente</h3>
+        </div>
+        <div class="product-info-body">
+            {% with vehicle=service_order.pk_id_carro %}
+                {% if vehicle %}
+                    <div class="info-item">
+                        <span class="info-label">
+                            <i class="fas fa-car"></i> Veículo (Placa)
+                        </span>
+                        <span class="info-value">
+                            <a href="{% url 'vehicles:vehicle_detail' vehicle.pk %}" style="color: #3b82f6; text-decoration: none;">
+                                {{ vehicle.marca }} {{ vehicle.modelo }} ({{ vehicle.placa }})
+                            </a>
+                        </span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">
+                            <i class="fas fa-calendar"></i> Ano do Veículo
+                        </span>
+                        <span class="info-value">{{ vehicle.ano }}</span>
+                    </div>
+                    
+                    {% with customer=vehicle.pk_id_cliente %}
+                        {% if customer %}
+                            <div class="info-item">
+                                <span class="info-label">
+                                    <i class="fas fa-user"></i> Cliente
+                                </span>
+                                <span class="info-value">
+                                    <a href="{% url 'customers:customer_detail' customer.pk %}" style="color: #3b82f6; text-decoration: none;">
+                                        {{ customer.nome }}
+                                    </a>
+                                </span>
+                            </div>
+                            
+                            <div class="info-item">
+                                <span class="info-label">
+                                    <i class="fas fa-phone"></i> Telefone
+                                </span>
+                                <span class="info-value">{{ customer.telefone|default:"Não informado" }}</span>
+                            </div>
+                        {% else %}
+                            <div class="info-item">
+                                <span class="info-label">
+                                    <i class="fas fa-user"></i> Cliente
+                                </span>
+                                <span class="info-value" style="color: #6b7280;">Nenhum cliente associado</span>
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                {% else %}
+                    <div class="info-item">
+                        <span class="info-label">
+                            <i class="fas fa-car"></i> Veículo
+                        </span>
+                        <span class="info-value" style="color: #6b7280;">Nenhum veículo associado</span>
+                    </div>
+                {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+
+    <!-- Descrições do Serviço -->
+    <div class="product-info-card" style="margin-top: 2rem;">
+        <div class="product-info-header">
+            <h3><i class="fas fa-clipboard"></i> Descrições do Serviço</h3>
+        </div>
+        <div class="product-info-body">
+            <div class="info-item">
+                <span class="info-label">
+                    <i class="fas fa-exclamation-triangle"></i> Problema Reportado
+                </span>
+                <span class="info-value" style="max-width: 60%; text-align: right;">
+                    {{ service_order.descricao_problema|linebreaksbr|default:"Nenhuma descrição fornecida" }}
+                </span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">
+                    <i class="fas fa-tools"></i> Descrição do Conserto
+                </span>
+                <span class="info-value" style="max-width: 60%; text-align: right;">
+                    {{ service_order.descricao_concerto|linebreaksbr|default:"Nenhuma descrição do conserto fornecida ainda" }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Informações de Sistema -->
+    <div class="product-info-card" style="margin-top: 2rem;">
+        <div class="product-info-header">
+            <h3><i class="fas fa-clock"></i> Informações do Sistema</h3>
+        </div>
+        <div class="product-info-body">
+            <div class="info-item">
+                <span class="info-label">
+                    <i class="fas fa-calendar-plus"></i> Criado em
+                </span>
+                <span class="info-value">{{ service_order.created_at|date:"d/m/Y H:i" }}</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">
+                    <i class="fas fa-clock"></i> Última Atualização
+                </span>
+                <span class="info-value">{{ service_order.updated_at|date:"d/m/Y H:i" }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botão Voltar -->
+    <div style="text-align: center; margin-top: 2rem;">
+        <a href="{% url 'services:service_order_list' %}" class="back-button">
+            <i class="fas fa-arrow-left"></i> Voltar para Lista de Ordens de Serviço
+        </a>
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Exclusão
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center">
+                    <i class="fas fa-exclamation-triangle text-danger" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <h6>Tem certeza que deseja excluir este registro?</h6>
+                    <p class="text-muted">
+                        <strong id="itemInfo">Item</strong>
+                    </p>
+                    <div class="alert alert-warning alert-dismissible-false">
+                        <small><i class="fas fa-info-circle me-1"></i>Esta ação não pode ser desfeita.</small>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Cancelar
+                </button>
+                <form method="post" action="" style="display: inline;" id="deleteForm">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger" id="confirmDeleteBtn">
+                        <i class="fas fa-trash-alt me-1"></i>Sim, Excluir
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script src="{% static 'js/modules/delete-modal.js' %}"></script>
+{% endblock extra_js %}

@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+{% load humanize %}
+
+{% block title %}Ordens de Serviço{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/calendar.css' %}">
+<link rel="stylesheet" href="{% static 'css/delete-modal.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<div class="container-fluid" style="max-width: 1400px; margin: 0 auto; padding: 2rem;">
+    <!-- Page Header -->
+    <div class="modern-content-header">
+        <div class="modern-content-title">
+            <i class="fas fa-wrench me-2"></i>
+            Ordens de Serviço
+        </div>
+        <div class="modern-content-actions">
+            <a href="{% url 'services:service_order_create' %}" class="modern-add-btn">
+                <i class="fas fa-plus me-1"></i> Nova Ordem de Serviço
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="modern-stats-grid">
+        <div class="modern-stat-card">
+            <div class="modern-stat-number">{{ service_orders.count|default:0 }}</div>
+            <div class="modern-stat-label">Total de Ordens</div>
+        </div>
+        <div class="modern-stat-card stat-success">
+            <div class="modern-stat-number">{{ count_concluidas|default:0 }}</div>
+            <div class="modern-stat-label">Concluídas</div>
+        </div>
+        <div class="modern-stat-card stat-warning">
+            <div class="modern-stat-number">{{ count_andamento|default:0 }}</div>
+            <div class="modern-stat-label">Em Andamento</div>
+        </div>
+        <div class="modern-stat-card stat-danger">
+            <div class="modern-stat-number">{{ count_pendentes|default:0 }}</div>
+            <div class="modern-stat-label">Pendentes</div>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Lista de Ordens de Serviço -->
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <div class="modern-table-container">
+                <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+                    <h6 class="mb-0 d-flex align-items-center gap-2">
+                        <i class="fas fa-list text-muted"></i>
+                        Lista de Ordens de Serviço
+                    </h6>
+                    <span class="modern-badge">
+                      {{ service_orders.count|default:0 }} 
+                      {% if service_orders.count == 1 %}ordem{% else %}ordens{% endif %}
+                    </span>
+                </div>
+                
+                {% if service_orders %}
+                    <div class="table-responsive">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Ordem</th>
+                                    <th>Veículo</th>
+                                    <th>Entrada</th>
+                                    <th>Status</th>
+                                    <th>Orçamento</th>
+                                    <th style="width: 60px; text-align: center;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in service_orders %}
+                                <tr>
+                                    <td>
+                                        <strong style="color: #1e293b;">OS #{{ order.id }}</strong>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            <a href="{% url 'vehicles:vehicle_detail' order.pk_id_carro.pk %}" class="modern-link">
+                                                <strong>{{ order.pk_id_carro.marca }} {{ order.pk_id_carro.modelo }}</strong>
+                                            </a>
+                                            <small class="text-muted">{{ order.pk_id_carro.placa }}</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span style="color: #374151;">{{ order.data_de_entrada|date:"d/m/Y" }}</span>
+                                    </td>
+                                    <td>
+                                        {% if order.status == 'PENDENTE' %}
+                                            <span class="badge bg-warning">{{ order.get_status_display }}</span>
+                                        {% elif order.status == 'EM_ANDAMENTO' %}
+                                            <span class="badge bg-info">{{ order.get_status_display }}</span>
+                                        {% elif order.status == 'CONCLUIDA' %}
+                                            <span class="badge bg-success">{{ order.get_status_display }}</span>
+                                        {% elif order.status == 'ENTREGUE' %}
+                                            <span class="badge bg-primary">{{ order.get_status_display }}</span>
+                                        {% elif order.status == 'CANCELADA' %}
+                                            <span class="badge bg-danger">{{ order.get_status_display }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ order.get_status_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if order.orcamento %}
+                                            <span style="color: #16a34a; font-weight: 500;">R$ {{ order.orcamento_reais|floatformat:2 }}</span>
+                                        {% else %}
+                                            <span class="text-muted">Não informado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="actions-cell">
+                                        <div class="kebab-menu">
+                                            <button class="kebab-btn" type="button" onclick="toggleKebabMenu(this)">
+                                                <span class="kebab-icon"></span>
+                                            </button>
+                                            <div class="kebab-dropdown">
+                                                <a href="{% url 'services:service_order_detail' order.pk %}" class="kebab-dropdown-item">
+                                                    <i class="fas fa-eye"></i>
+                                                    Ver Detalhes
+                                                </a>
+                                                <a href="{% url 'services:service_order_edit' order.pk %}" class="kebab-dropdown-item">
+                                                    <i class="fas fa-edit"></i>
+                                                    Editar
+                                                </a>
+                                                <div class="kebab-dropdown-separator"></div>
+                                                <button type="button" class="kebab-dropdown-item danger" 
+                                                        data-bs-toggle="modal" 
+                                                        data-bs-target="#deleteModal"
+                                                        data-item-id="{{ order.pk }}"
+                                                        data-item-name="OS #{{ order.id }} - {{ order.pk_id_carro.placa }}"
+                                                        data-item-type="Ordem de Serviço">
+                                                    <i class="fas fa-trash"></i>
+                                                    Excluir
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-wrench fa-3x text-muted mb-3"></i>
+                        <h5 style="color: #6b7280;">Nenhuma ordem de serviço encontrada</h5>
+                        <p class="text-muted">Crie novas ordens de serviço para vê-las listadas aqui.</p>
+                        <a href="{% url 'services:service_order_create' %}" class="modern-add-btn">
+                            <i class="fas fa-plus me-1"></i>
+                            Criar Primeira Ordem
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Search Sidebar -->
+        <div class="col-lg-3">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0"><i class="fas fa-filter me-2"></i>Filtros</h6>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="search-form">
+                        <div class="mb-3">
+                            <label for="q" class="form-label">Buscar</label>
+                            <div class="input-group">
+                                <input type="text" 
+                                    class="form-control form-control-sm" 
+                                    id="q"
+                                    name="q" 
+                                    placeholder="Pesquisar por veículo, cliente, status..." 
+                                    value="{{ search_query }}">
+                                {% if vehicle_id and vehicle_obj %}
+                                    <input type="hidden" name="vehicle_id" value="{{ vehicle_id }}">
+                                    <span class="input-group-text bg-light text-dark" style="font-size: 0.95em; border-left: 0;">
+                                        <i class="fas fa-car me-1"></i>
+                                        {{ vehicle_obj.placa }} - {{ vehicle_obj.marca }} {{ vehicle_obj.modelo }}
+                                        <a href="{% url 'services:service_order_list' %}" class="ms-2 text-danger" style="text-decoration: none; font-size: 1.1em;">&times;</a>
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select name="status" id="status" class="form-control form-control-sm">
+                                <option value="">Todos</option>
+                                <option value="PENDENTE">Pendente</option>
+                                <option value="EM_ANDAMENTO">Em Andamento</option>
+                                <option value="CONCLUIDA">Concluída</option>
+                                <option value="ENTREGUE">Entregue</option>
+                                <option value="CANCELADA">Cancelada</option>
+                            </select>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="fas fa-search"></i>
+                                Buscar
+                            </button>
+                            {% if search_query %}
+                                <a href="{% url 'services:service_order_list' %}" class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-times"></i>
+                                    Limpar
+                                </a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Exclusão
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center">
+                    <i class="fas fa-exclamation-triangle text-danger" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <h6>Tem certeza que deseja excluir este registro?</h6>
+                    <p class="text-muted">
+                        <strong id="itemInfo">Item</strong>
+                    </p>
+                    <div class="alert alert-warning alert-dismissible-false">
+                        <small><i class="fas fa-info-circle me-1"></i>Esta ação não pode ser desfeita.</small>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Cancelar
+                </button>
+                <form method="post" action="" style="display: inline;" id="deleteForm">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger" id="confirmDeleteBtn">
+                        <i class="fas fa-trash-alt me-1"></i>Sim, Excluir
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script src="{% static 'js/modules/delete-modal.js' %}"></script>
+<script src="{% static 'js/modules/kebab-menu.js' %}"></script>
+{% endblock extra_js %}

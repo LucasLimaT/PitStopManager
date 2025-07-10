@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% load static %}
+
+{% block title %}{{ product.nome }} - Detalhes do Produto{% endblock title %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/inventory.css' %}">
+<link rel="stylesheet" href="{% static 'css/delete-modal.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<div class="container-fluid" style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
+    <!-- Informações do Produto -->
+    <div class="product-info-card">
+        <div class="product-info-header">
+            <h3><i class="fas fa-info-circle"></i> Informações do Produto</h3>
+            <div class="header-actions">
+                <a href="{% url 'inventory:product_edit' product.pk %}" class="header-action-btn">
+                    <i class="fas fa-edit"></i> Editar
+                </a>
+                <button type="button" class="header-action-btn delete" data-bs-toggle="modal" data-bs-target="#deleteModal"
+                        data-item-id="{{ product.pk }}"
+                        data-item-name="{{ product.nome }}"
+                        data-item-type="Produto">
+                    <i class="fas fa-trash-alt"></i> Excluir
+                </button>
+            </div>
+        </div>
+        <div class="product-info-body">
+            <div class="info-item">
+                <span class="info-label">
+                    <i class="fas fa-tag"></i> Nome do Produto
+                </span>
+                <span class="info-value">{{ product.nome }}</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">
+                    <i class="fas fa-cubes"></i> Estoque Atual
+                </span>
+                <span class="info-value">
+                    <span class="stock-status {% if product.estoque <= 0 %}stock-out{% elif product.estoque <= 5 %}stock-low{% else %}stock-good{% endif %}">
+                        {{ product.estoque|default:0 }} unidades
+                    </span>
+                </span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">
+                    <i class="fas fa-calendar-plus"></i> Data de Criação
+                </span>
+                <span class="info-value">{{ product.created_at|date:"d/m/Y H:i" }}</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">
+                    <i class="fas fa-clock"></i> Última Atualização
+                </span>
+                <span class="info-value">{{ product.updated_at|date:"d/m/Y H:i" }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botão Voltar -->
+    <div style="text-align: center;">
+        <a href="{% url 'inventory:product_list' %}" class="back-button">
+            <i class="fas fa-arrow-left"></i> Voltar para Lista de Produtos
+        </a>
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Exclusão
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center">
+                    <i class="fas fa-exclamation-triangle text-danger" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <h6>Tem certeza que deseja excluir este registro?</h6>
+                    <p class="text-muted">
+                        <strong id="itemInfo">Item</strong>
+                    </p>
+                    <div class="alert alert-warning alert-dismissible-false">
+                        <small><i class="fas fa-info-circle me-1"></i>Esta ação não pode ser desfeita.</small>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Cancelar
+                </button>
+                <form method="post" action="" style="display: inline;" id="deleteForm">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger" id="confirmDeleteBtn">
+                        <i class="fas fa-trash-alt me-1"></i>Sim, Excluir
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script src="{% static 'js/modules/delete-modal.js' %}"></script>
+{% endblock extra_js %}

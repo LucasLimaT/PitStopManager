@@ -1,0 +1,11 @@
+body {
+    background: #FFFFFF;
+    margin: 0;
+    padding: 0;
+}
+
+.main-wrapper .container {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 20px;
+}

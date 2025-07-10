@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% load static %}
+
+{% block title %}{{ vehicle.marca }} {{ vehicle.modelo }} - Detalhes do Veículo{% endblock title %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/inventory.css' %}">
+<link rel="stylesheet" href="{% static 'css/delete-modal.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<div class="container-fluid" style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
+    <!-- Informações do Veículo -->
+    <div class="product-info-card">
+        <div class="product-info-header">
+            <h3><i class="fas fa-car"></i> Informações do Veículo</h3>
+            <div class="header-actions">
+                <a href="{% url 'vehicles:vehicle_edit' vehicle.pk %}" class="header-action-btn">
+                    <i class="fas fa-edit"></i> Editar
+                </a>
+                <button type="button" class="header-action-btn delete" data-bs-toggle="modal" data-bs-target="#deleteModal"
+                        data-item-id="{{ vehicle.pk }}"
+                        data-item-name="{{ vehicle.marca }} {{ vehicle.modelo }} ({{ vehicle.placa }})"
+                        data-item-type="Veículo">
+                    <i class="fas fa-trash-alt"></i> Excluir
+                </button>
+            </div>
+        </div>
+        <div class="product-info-body">
+            <div class="info-item">
+                <span class="info-label">
+                    <i class="fas fa-id-card"></i> Placa
+                </span>
+                <span class="info-value">
+                    <span class="badge bg-secondary">{{ vehicle.placa|default:"Não informado" }}</span>
+                </span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">
+                    <i class="fas fa-car-side"></i> Marca
+                </span>
+                <span class="info-value">{{ vehicle.marca|default:"Não informado" }}</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">
+                    <i class="fas fa-car"></i> Modelo
+                </span>
+                <span class="info-value">{{ vehicle.modelo|default:"Não informado" }}</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">
+                    <i class="fas fa-calendar"></i> Ano
+                </span>
+                <span class="info-value">{{ vehicle.ano|default:"Não informado" }}</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">
+                    <i class="fas fa-user"></i> Proprietário
+                </span>
+                <span class="info-value">
+                    {% if vehicle.pk_id_cliente %}
+                        <a href="{% url 'customers:customer_detail' vehicle.pk_id_cliente.pk %}" class="text-decoration-none">
+                            {{ vehicle.pk_id_cliente.nome }}
+                        </a>
+                    {% else %}
+                        Não informado
+                    {% endif %}
+                </span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">
+                    <i class="fas fa-calendar-plus"></i> Data de Cadastro
+                </span>
+                <span class="info-value">{{ vehicle.created_at|date:"d/m/Y H:i"|default:"Não informado" }}</span>
+            </div>
+            
+            <!-- Ações Rápidas -->
+            <div class="info-item">
+                <span class="info-label">
+                    <i class="fas fa-tools"></i> Ações Rápidas
+                </span>
+                <span class="info-value">
+                    <a href="{% url 'services:service_order_create' %}?vehicle_id={{ vehicle.pk }}" class="header-action-btn">
+                        <i class="fas fa-plus"></i> Nova OS
+                    </a>
+                    <a href="{% url 'scheduling:appointment_create' %}?vehicle_id={{ vehicle.pk }}" class="header-action-btn" style="margin-left: 10px;">
+                        <i class="fas fa-calendar-plus"></i> Agendar
+                    </a>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Histórico de Atividades -->
+    <div class="product-info-card" style="margin-top: 2rem;">
+        <div class="product-info-header">
+            <h3><i class="fas fa-history"></i> Histórico de Atividades</h3>
+        </div>
+        <div class="product-info-body">
+            <div class="info-item">
+                <span class="info-label">
+                    <i class="fas fa-wrench"></i> Ordens de Serviço
+                </span>
+                <span class="info-value">
+                    <a href="{% url 'services:service_order_list' %}?vehicle_id={{ vehicle.pk }}" class="header-action-btn">
+                        <i class="fas fa-eye"></i> Ver Ordens
+                    </a>
+                </span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">
+                    <i class="fas fa-calendar-alt"></i> Agendamentos
+                </span>
+                <span class="info-value">
+                    <a href="{% url 'scheduling:appointment_list' %}?vehicle_id={{ vehicle.pk }}" class="header-action-btn">
+                        <i class="fas fa-eye"></i> Ver Agendamentos
+                    </a>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botão de Voltar -->
+    <div style="margin-top: 2rem; text-align: center;">
+        <a href="{% url 'vehicles:vehicle_list' %}" class="header-action-btn" style="font-size: 1.1rem; padding: 12px 24px;">
+            <i class="fas fa-arrow-left"></i> Voltar para Lista de Veículos
+        </a>
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Exclusão
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center">
+                    <i class="fas fa-exclamation-triangle text-danger" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <h6>Tem certeza que deseja excluir este registro?</h6>
+                    <p class="text-muted">
+                        <strong id="itemInfo">Item</strong>
+                    </p>
+                    <div class="alert alert-warning alert-dismissible-false">
+                        <small><i class="fas fa-info-circle me-1"></i>Esta ação não pode ser desfeita.</small>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Cancelar
+                </button>
+                <form method="post" action="" style="display: inline;" id="deleteForm">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger" id="confirmDeleteBtn">
+                        <i class="fas fa-trash-alt me-1"></i>Sim, Excluir
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/modules/delete-modal.js' %}"></script>
+{% endblock extra_js %}

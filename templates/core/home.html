@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Dashboard - PitStop Manager{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock extra_css %}
+
+{% block content_body %}
+<div class="container-fluid" style="max-width: 1400px; margin: 0 auto; padding: 2rem;">
+    <!-- Page Header -->
+    <div class="modern-content-header">
+        <div class="modern-content-title">
+            <i class="fas fa-chart-line me-2"></i>
+            Dashboard
+        </div>
+        <div class="modern-content-actions">
+            <a href="{% url 'services:service_order_create' %}" class="modern-add-btn">
+                <i class="fas fa-plus"></i> Nova Ordem de Serviço
+            </a>
+            <a href="{% url 'scheduling:appointment_create' %}" class="modern-add-btn">
+                <i class="fas fa-calendar-plus"></i> Novo Agendamento
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Grid -->
+    <div class="modern-stats-grid">
+        <div class="modern-stat-card">
+            <div class="modern-stat-number">R$ {{ monthly_revenue|floatformat:2|default:"0,00" }}</div>
+            <div class="modern-stat-label">Faturamento Mensal</div>
+        </div>
+        <div class="modern-stat-card stat-warning">
+            <div class="modern-stat-number">{{ pending_orders|default:"0" }}</div>
+            <div class="modern-stat-label">Ordens Pendentes</div>
+        </div>
+        <div class="modern-stat-card stat-success">
+            <div class="modern-stat-number">{{ vehicles_served_this_month|default:"0" }}</div>
+            <div class="modern-stat-label">Veículos Atendidos</div>
+        </div>
+        <div class="modern-stat-card">
+            <div class="modern-stat-number">{{ appointments_today|default:"0" }}</div>
+            <div class="modern-stat-label">Agendamentos Hoje</div>
+        </div>
+    </div>
+
+    <!-- Content Grid Hierárquico -->
+    <div class="dashboard-hierarchical-grid">
+        <!-- Zona de Alta Prioridade -->
+        <div class="dashboard-priority-zone">
+            <!-- Próximos Agendamentos - ALTA PRIORIDADE -->
+            <div class="modern-card dashboard-appointments">
+                <div class="modern-card-header">
+                    <h3><i class="fas fa-calendar-check me-2"></i> Próximos Agendamentos</h3>
+                    <a href="{% url 'scheduling:appointment_list' %}" class="modern-btn modern-btn-sm modern-btn-secondary">
+                        Ver Todos
+                    </a>
+                </div>
+                <div class="modern-card-body">
+                    {% if upcoming_appointments %}
+                    <div class="modern-appointments-list">
+                        {% for appointment in upcoming_appointments %}
+                        <div class="modern-appointment-card">
+                            <div class="modern-appointment-time">
+                                {{ appointment.data_do_agendamento|date:"d/m H:i" }}
+                            </div>
+                            <div class="modern-appointment-details">
+                                <div class="modern-appointment-customer">
+                                    {{ appointment.pk_id_carro.pk_id_cliente.nome|default:"Cliente não identificado"|truncatechars:18 }}
+                                </div>
+                                <div class="modern-appointment-vehicle">
+                                    {{ appointment.pk_id_carro.display_name|default:"Veículo não identificado"|truncatechars:25 }}
+                                </div>
+                            </div>
+                            <a href="{% url 'scheduling:appointment_detail' appointment.pk %}" 
+                               class="modern-btn-icon" title="Ver Detalhes">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="modern-empty-state">
+                        <i class="fas fa-calendar-times"></i>
+                        <h4>Nenhum Agendamento Próximo</h4>
+                        <p>Adicione novos agendamentos.</p>
+                        <a href="{% url 'scheduling:appointment_create' %}" class="modern-btn modern-btn-primary">
+                            <i class="fas fa-plus me-2"></i> Novo Agendamento
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Faturamento Mensal - ALTA PRIORIDADE -->
+            <div class="modern-card dashboard-revenue">
+                <div class="modern-card-header">
+                    <h3><i class="fas fa-chart-bar me-2"></i> Faturamento Mensal</h3>
+                </div>
+                <div class="modern-card-body">
+                    {% if monthly_revenues %}
+                    <div class="revenue-history">
+                        {% for month_data in monthly_revenues %}
+                        <div class="revenue-month-item">
+                            <div class="revenue-month">{{ month_data.month }}</div>
+                            <div class="revenue-amount">
+                                R$ {{ month_data.revenue|floatformat:2|default:"0,00" }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="modern-empty-state">
+                        <i class="fas fa-chart-line"></i>
+                        <h4>Sem Dados de Faturamento</h4>
+                        <p>Complete algumas ordens para ver o histórico.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Zona Média -->
+        <div class="dashboard-medium-zone">
+            <!-- Ordens de Serviço Recentes - TAMANHO MÉDIO -->
+            <div class="modern-card dashboard-orders">
+                <div class="modern-card-header">
+                    <h3><i class="fas fa-clipboard-list me-2"></i> Ordens de Serviço Recentes</h3>
+                    <a href="{% url 'services:service_order_list' %}" class="modern-btn modern-btn-sm modern-btn-secondary">
+                        Ver Todas
+                    </a>
+                </div>
+                <div class="modern-card-body">
+                    {% if recent_service_orders %}
+                    <div class="service-orders-container">
+                        {% for order in recent_service_orders %}
+                        <div class="service-order-row">
+                            <!-- Order Header -->
+                            <div class="order-header-section">
+                                <div class="order-id-section">
+                                    <strong>#{{ order.id|stringformat:"04d" }}</strong>
+                                </div>
+                                <div class="order-status-section">
+                                    <span class="status-indicator status-{{ order.status|lower }}">
+                                        {{ order.get_status_display|default:order.status }}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- Order Content -->
+                            <div class="order-content-section">
+                                <div class="customer-vehicle-section">
+                                    <div class="customer-info">
+                                        <i class="fas fa-user text-muted me-1"></i>
+                                        <span class="fw-medium">{{ order.pk_id_carro.pk_id_cliente.nome|default:"Cliente não identificado"|truncatechars:20 }}</span>
+                                    </div>
+                                    <div class="vehicle-info">
+                                        <i class="fas fa-car text-muted me-1"></i>
+                                        <span>{{ order.pk_id_carro.display_name|default:"Veículo não identificado"|truncatechars:25 }}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="order-financial-section">
+                                    <div class="order-amount">
+                                        <strong class="text-success">R$ {{ order.orcamento_reais|floatformat:2|default:"0,00" }}</strong>
+                                    </div>
+                                    <div class="order-entry-date">
+                                        <small class="text-muted">{{ order.data_de_entrada|date:"d/m/Y" }}</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="order-action-section">
+                                    <a href="{% url 'services:service_order_detail' order.pk %}" 
+                                       class="order-detail-btn" 
+                                       title="Ver Detalhes">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="modern-empty-state">
+                        <i class="fas fa-folder-open"></i>
+                        <h4>Nenhuma Ordem de Serviço Recente</h4>
+                        <p>Crie uma nova ordem de serviço para começar.</p>
+                        <a href="{% url 'services:service_order_create' %}" class="modern-btn modern-btn-primary">
+                            <i class="fas fa-plus me-2"></i> Nova Ordem
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Zona de Baixa Prioridade -->
+        <div class="dashboard-low-zone">
+            <!-- Resumo Mensal - TAMANHO PEQUENO -->
+            <div class="modern-card dashboard-summary">
+                <div class="modern-card-header">
+                    <h3><i class="fas fa-chart-line me-2"></i> Resumo Mensal</h3>
+                </div>
+                <div class="modern-card-body">
+                    <div class="modern-quick-stats">
+                        <div class="modern-quick-stat">
+                            <div class="modern-quick-stat-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="modern-quick-stat-content">
+                                <div class="modern-quick-stat-number">{{ completed_orders_last_30_days|default:"0" }}</div>
+                                <div class="modern-quick-stat-label">Ordens Concluídas</div>
+                            </div>
+                        </div>
+                        <div class="modern-quick-stat">
+                            <div class="modern-quick-stat-icon success">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="modern-quick-stat-content">
+                                <div class="modern-quick-stat-number">{{ total_customers|default:"0" }}</div>
+                                <div class="modern-quick-stat-label">Total de Clientes</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Produtos em Falta - TAMANHO PEQUENO -->
+            <div class="modern-card dashboard-stock">
+                <div class="modern-card-header">
+                    <h3><i class="fas fa-exclamation-triangle me-2 text-warning"></i> Produtos em Falta</h3>
+                    <a href="{% url 'inventory:product_list' %}" class="modern-btn modern-btn-sm modern-btn-secondary">
+                        Ver Estoque
+                    </a>
+                </div>
+                <div class="modern-card-body">
+                    {% if low_stock_products %}
+                    <div class="low-stock-list">
+                        {% for product in low_stock_products %}
+                        <div class="low-stock-item">
+                            <div class="product-info">
+                                <div class="product-name">{{ product.nome }}</div>
+                                <div class="product-code">ID: {{ product.id }}</div>
+                            </div>
+                            <div class="stock-info">
+                                <span class="stock-quantity {% if product.estoque <= 2 %}critical{% elif product.estoque <= 5 %}warning{% endif %}">
+                                    {{ product.estoque }} unid.
+                                </span>
+                            </div>
+                            <div class="product-action-section">
+                                <a href="{% url 'inventory:product_detail' product.pk %}" 
+                                   class="product-detail-btn" 
+                                   title="Ver Detalhes">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="modern-empty-state">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <h4>Estoque em Ordem</h4>
+                        <p>Todos os produtos estão com estoque adequado.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
+{% endblock %}

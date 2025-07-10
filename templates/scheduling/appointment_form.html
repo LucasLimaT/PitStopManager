@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}
+    {% if form.instance.pk %}
+        Edit Appointment
+    {% else %}
+        Create Appointment
+    {% endif %}
+{% endblock title %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="modern-card">
+        <div class="modern-card-header">
+            <h2 class="h5 mb-0">
+                {% if form.instance.pk %}
+                    Edit Appointment #{{ form.instance.pk }}
+                {% else %}
+                    Criar novo agendamento
+                {% endif %}
+            </h2>
+        </div>
+        <div class="modern-card-body">
+            <form method="post" novalidate data-form-type="appointment">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="modern-alert modern-alert-danger">
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.pk_id_carro.id_for_label }}" class="form-label">{{ form.pk_id_carro.label }}*</label>
+                        {% render_field form.pk_id_carro class="form-select" %}
+                        {% if form.pk_id_carro.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.pk_id_carro.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="form-text text-muted">{{ form.pk_id_carro.help_text|default:"Select the vehicle for the appointment." }}</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.pk_id_ordem_de_servico.id_for_label }}" class="form-label">{{ form.pk_id_ordem_de_servico.label }}*</label>
+                        {% render_field form.pk_id_ordem_de_servico class="form-select" %}
+                        {% if form.pk_id_ordem_de_servico.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.pk_id_ordem_de_servico.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="form-text text-muted">{{ form.pk_id_ordem_de_servico.help_text|default:"Link to an existing service order." }}</small>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="{{ form.data_do_agendamento.id_for_label }}" class="form-label">{{ form.data_do_agendamento.label }}*</label>
+                    {% render_field form.data_do_agendamento class="form-control" type="datetime-local" data_is_create_form=is_create_form %}
+                    {% if form.data_do_agendamento.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.data_do_agendamento.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <small class="form-text text-muted">{{ form.data_do_agendamento.help_text|default:"Date and time of the appointment." }}</small>
+                </div>
+
+                <div class="mb-3">
+                    <label for="{{ form.responsavel.id_for_label }}" class="form-label">{{ form.responsavel.label }}*</label>
+                    {% render_field form.responsavel class="form-control" placeholder="Insira o nome do responsavel" %}
+                    {% if form.responsavel.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.responsavel.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <small class="form-text text-muted">{{ form.responsavel.help_text|default:"Person responsible for this appointment (e.g., customer name or staff who booked it)." }}</small>
+                </div>
+                
+                <hr>
+
+                <div class="d-flex justify-content-end">
+                    <a href="{% url 'scheduling:appointment_list' %}" class="modern-btn modern-btn-secondary me-2">
+                        <i class="fas fa-times me-1"></i>Cancel
+                    </a>
+                    <button type="submit" class="modern-btn modern-btn-success">
+                        <i class="fas fa-save me-1"></i>
+                        {% if form.instance.pk %}
+                            Save Changes
+                        {% else %}
+                            Create Appointment
+                        {% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock content %}

@@ -1,0 +1,45 @@
+.form-group {
+    margin-bottom: 18px; 
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+label {
+    display: block;
+    margin-bottom: 6px; 
+    font-weight: 500; 
+    color: #495057; 
+    font-size: 0.9rem;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+select,
+textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ced4da; 
+    border-radius: 4px; 
+    font-size: 0.95rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background-color: #fff;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #FF9800; 
+    box-shadow: 0 0 0 0.2rem rgba(255, 152, 0, 0.25); 
+}
+
+textarea {
+    min-height: 100px;
+}

@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% load static %}
+
+{% block title %}{{ customer.nome }} - Detalhes do Cliente{% endblock title %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/inventory.css' %}">
+<link rel="stylesheet" href="{% static 'css/delete-modal.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<div class="container-fluid" style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
+    <!-- Informações do Cliente -->
+    <div class="product-info-card">
+        <div class="product-info-header">
+            <h3><i class="fas fa-user"></i> Informações do Cliente</h3>
+            <div class="header-actions">
+                <a href="{% url 'customers:customer_edit' customer.pk %}" class="header-action-btn">
+                    <i class="fas fa-edit"></i> Editar
+                </a>
+                <button type="button" class="header-action-btn delete" data-bs-toggle="modal" data-bs-target="#deleteModal"
+                        data-item-id="{{ customer.pk }}"
+                        data-item-name="{{ customer.nome }}"
+                        data-item-type="Cliente">
+                    <i class="fas fa-trash-alt"></i> Excluir
+                </button>
+            </div>
+        </div>
+        <div class="product-info-body">
+            <div class="info-item">
+                <span class="info-label">
+                    <i class="fas fa-user-tag"></i> Nome Completo
+                </span>
+                <span class="info-value">{{ customer.nome }}</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">
+                    <i class="fas fa-phone"></i> Telefone
+                </span>
+                <span class="info-value">{{ customer.telefone|default:"Não informado" }}</span>
+            </div>
+            
+            <div class="info-item">
+                <span class="info-label">
+                    <i class="fas fa-calendar-plus"></i> Data de Cadastro
+                </span>
+                <span class="info-value">{{ customer.created_at|date:"d/m/Y H:i"|default:"Não informado" }}</span>
+            </div>
+            
+            <!-- Ações Rápidas -->
+            <div class="info-item">
+                <span class="info-label">
+                    <i class="fas fa-tools"></i> Ações Rápidas
+                </span>
+                <span class="info-value">
+                    <a href="{% url 'vehicles:vehicle_create' %}?customer={{ customer.pk }}" class="header-action-btn">
+                        <i class="fas fa-plus"></i> Adicionar Veículo
+                    </a>
+                    <a href="{% url 'services:service_order_create' %}?customer={{ customer.pk }}" class="header-action-btn" style="margin-left: 10px;">
+                        <i class="fas fa-plus"></i> Nova Ordem de Serviço
+                    </a>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Veículos Registrados -->
+    <div class="product-info-card" style="margin-top: 2rem;">
+        <div class="product-info-header">
+            <h3><i class="fas fa-car"></i> Veículos Registrados</h3>
+        </div>
+        <div class="product-info-body">
+            {% if customer_vehicles %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-car-side"></i> Marca/Modelo</th>
+                                <th><i class="fas fa-calendar"></i> Ano</th>
+                                <th><i class="fas fa-id-card"></i> Placa</th>
+                                <th><i class="fas fa-cogs"></i> Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for vehicle in customer_vehicles %}
+                            <tr>
+                                <td>{{ vehicle.marca }} {{ vehicle.modelo }}</td>
+                                <td>{{ vehicle.ano }}</td>
+                                <td><span class="badge bg-secondary">{{ vehicle.placa }}</span></td>
+                                <td>
+                                    <a href="{% url 'vehicles:vehicle_detail' vehicle.pk %}" class="header-action-btn" title="Ver Detalhes">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'vehicles:vehicle_edit' vehicle.pk %}" class="header-action-btn" title="Editar" style="margin-left: 5px;">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="info-item">
+                    <span class="info-label">
+                        <i class="fas fa-info-circle"></i> Status
+                    </span>
+                    <span class="info-value text-muted">Nenhum veículo registrado para este cliente.</span>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Ordens de Serviço -->
+    <div class="product-info-card" style="margin-top: 2rem;">
+        <div class="product-info-header">
+            <h3><i class="fas fa-wrench"></i> Ordens de Serviço</h3>
+        </div>
+        <div class="product-info-body">
+            {% if customer_service_orders %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-hashtag"></i> OS</th>
+                                <th><i class="fas fa-car"></i> Veículo</th>
+                                <th><i class="fas fa-calendar"></i> Data</th>
+                                <th><i class="fas fa-info-circle"></i> Status</th>
+                                <th><i class="fas fa-cogs"></i> Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in customer_service_orders %}
+                            <tr>
+                                <td><span class="badge bg-primary">#{{ order.id|stringformat:"04d" }}</span></td>
+                                <td>{{ order.pk_id_carro.marca }} {{ order.pk_id_carro.modelo }}</td>
+                                <td>{{ order.data_de_entrada|date:"d/m/Y" }}</td>
+                                <td>
+                                    <span class="stock-status 
+                                        {% if order.status == 'PENDENTE' %}stock-low
+                                        {% elif order.status == 'EM_ANDAMENTO' %}stock-out
+                                        {% elif order.status == 'CONCLUIDA' %}stock-good
+                                        {% elif order.status == 'ENTREGUE' %}stock-good
+                                        {% elif order.status == 'CANCELADA' %}stock-out
+                                        {% else %}stock-low{% endif %}">
+                                        {{ order.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'services:service_order_detail' order.pk %}" class="header-action-btn" title="Ver Detalhes">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="info-item">
+                    <span class="info-label">
+                        <i class="fas fa-info-circle"></i> Status
+                    </span>
+                    <span class="info-value text-muted">Nenhuma ordem de serviço encontrada para este cliente.</span>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Botão de Voltar -->
+    <div style="margin-top: 2rem; text-align: center;">
+        <a href="{% url 'customers:customer_list' %}" class="header-action-btn" style="font-size: 1.1rem; padding: 12px 24px;">
+            <i class="fas fa-arrow-left"></i> Voltar para Lista de Clientes
+        </a>
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Exclusão
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center">
+                    <i class="fas fa-exclamation-triangle text-danger" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <h6>Tem certeza que deseja excluir este registro?</h6>
+                    <p class="text-muted">
+                        <strong id="itemInfo">Item</strong>
+                    </p>
+                    <div class="alert alert-warning alert-dismissible-false">
+                        <small><i class="fas fa-info-circle me-1"></i>Esta ação não pode ser desfeita.</small>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Cancelar
+                </button>
+                <form method="post" action="" style="display: inline;" id="deleteForm">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger" id="confirmDeleteBtn">
+                        <i class="fas fa-trash-alt me-1"></i>Sim, Excluir
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/modules/delete-modal.js' %}"></script>
+{% endblock extra_js %}

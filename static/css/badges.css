@@ -1,0 +1,148 @@
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-active {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-inactive {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.modern-stock-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.modern-stock-normal {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.modern-stock-low {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.modern-stock-out {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.priority-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.priority-low {
+    background: #FFF3E0;
+    color: #FF9800;
+}
+
+.priority-medium {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.priority-high {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.priority-urgent {
+    background: #fecaca;
+    color: #7f1d1d;
+}
+
+.service-status {
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-align: center;
+}
+
+.service-pending {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fbbf24;
+}
+
+.service-in-progress {
+    background: #FFF3E0;
+    color: #FF9800;
+    border: 1px solid #FFA726;
+}
+
+.service-completed {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #34d399;
+}
+
+.service-cancelled {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #f87171;
+}
+
+.payment-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.payment-pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.payment-paid {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.payment-overdue {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.vehicle-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.vehicle-available {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.vehicle-in-service {
+    background: #FFF3E0;
+    color: #FF9800;
+}
+
+.vehicle-maintenance {
+    background: #fef3c7;
+    color: #92400e;
+}

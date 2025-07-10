@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}
+    {% if form.instance.pk %}Editar Veículo{% else %}Criar Veículo{% endif %}
+{% endblock title %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Alerta para veículo deletado encontrado -->
+    {% if show_reactivate_option and deleted_vehicle %}
+    <div class="modern-alert modern-alert-warning mb-4">
+        <div class="modern-alert-header">
+            <h5 class="mb-0">
+                <i class="fas fa-exclamation-triangle me-2"></i>Veículo Deletado Encontrado
+            </h5>
+        </div>
+        <div class="modern-alert-body">
+            <p class="mb-3">
+                <strong>Foi encontrado um veículo deletado com a placa {{ deleted_vehicle.placa }}:</strong>
+            </p>
+            <ul class="list-unstyled mb-3">
+                <li><strong>Marca:</strong> {{ deleted_vehicle.marca }}</li>
+                <li><strong>Modelo:</strong> {{ deleted_vehicle.modelo }}</li>
+                <li><strong>Ano:</strong> {{ deleted_vehicle.ano }}</li>
+                <li><strong>Cliente:</strong> {{ deleted_vehicle.pk_id_cliente.nome }}</li>
+                <li><strong>Deletado em:</strong> {{ deleted_vehicle.deleted_at|date:"d/m/Y H:i" }}</li>
+            </ul>
+            <p class="text-muted mb-3">
+                Deseja reativar este veículo ao invés de criar um novo?
+            </p>
+            <div class="d-flex gap-2">
+                <form method="post" action="{% url 'vehicles:vehicle_reactivate' deleted_vehicle.pk %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="modern-btn modern-btn-success">
+                        <i class="fas fa-undo me-1"></i>Reativar Veículo
+                    </button>
+                </form>
+                <button type="button" class="modern-btn modern-btn-secondary" onclick="dismissReactivateOption()">
+                    <i class="fas fa-plus me-1"></i>Criar Novo Veículo Mesmo Assim
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="modern-card" {% if show_reactivate_option %}style="opacity: 0.7;"{% endif %}>
+        <div class="modern-card-header">
+            <h2 class="h5 mb-0">
+                {% if form.instance.pk %}
+                    Editar Veículo: {{ form.instance.placa }}
+                {% else %}
+                    Criar Novo Veículo
+                {% endif %}
+            </h2>
+        </div>
+        <div class="modern-card-body">
+            <form method="post" novalidate id="vehicleForm" data-form-type="vehicle">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="modern-alert modern-alert-danger">
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.pk_id_cliente.id_for_label }}" class="form-label">{{ form.pk_id_cliente.label }}*</label>
+                        {% render_field form.pk_id_cliente class+="form-select" %}
+                        {% if form.pk_id_cliente.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.pk_id_cliente.errors %}<span>{{ error }}</span>{% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="form-text text-muted">{{ form.pk_id_cliente.help_text|default:"Selecione o proprietário do veículo." }}</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.placa.id_for_label }}" class="form-label">{{ form.placa.label }}*</label>
+                        {% render_field form.placa class+="form-control" %}
+                        {% if form.placa.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.placa.errors %}<span>{{ error }}</span>{% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="form-text text-muted">{{ form.placa.help_text|default:"Formato: AAA-1234 ou ABC1D23." }}</small>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.marca.id_for_label }}" class="form-label">{{ form.marca.label }}*</label>
+                        {% render_field form.marca class+="form-control" %}
+                        {% if form.marca.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.marca.errors %}<span>{{ error }}</span>{% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="form-text text-muted">{{ form.marca.help_text|default:"Ex: Fiat, Volkswagen, Ford." }}</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.modelo.id_for_label }}" class="form-label">{{ form.modelo.label }}*</label>
+                        {% render_field form.modelo class+="form-control" %}
+                        {% if form.modelo.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.modelo.errors %}<span>{{ error }}</span>{% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="form-text text-muted">{{ form.modelo.help_text|default:"Ex: Uno, Gol, Ka." }}</small>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.ano.id_for_label }}" class="form-label">{{ form.ano.label }}*</label>
+                        {% render_field form.ano class+="form-control" %}
+                        {% if form.ano.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.ano.errors %}<span>{{ error }}</span>{% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="form-text text-muted">{{ form.ano.help_text|default:"Ano de fabricação do veículo." }}</small>
+                    </div>
+                </div>
+                
+                <hr class="my-4">
+
+                <div class="d-flex justify-content-end">
+                    <a href="{% if form.instance.pk %}{% url 'vehicles:vehicle_detail' form.instance.pk %}{% else %}{% url 'vehicles:vehicle_list' %}{% endif %}" class="modern-btn modern-btn-secondary me-2">
+                        <i class="fas fa-times me-1"></i>Cancelar
+                    </a>
+                    <button type="submit" class="modern-btn modern-btn-success">
+                        <i class="fas fa-save me-1"></i>
+                        {% if form.instance.pk %}Salvar Alterações{% else %}Criar Veículo{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if form.instance.pk %}
+    <div class="modern-card mt-4">
+        <div class="modern-card-header">
+            <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informações do Veículo</h5>
+        </div>
+        <div class="modern-card-body">
+            <small class="text-muted d-block mb-1"><strong>Criado:</strong> {{ form.instance.created_at|date:"Y-m-d H:i" }}</small>
+            <small class="text-muted d-block"><strong>Última Atualização:</strong> {{ form.instance.updated_at|date:"Y-m-d H:i" }}</small>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock content %}

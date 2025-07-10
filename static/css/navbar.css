@@ -1,0 +1,308 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.modern-header {
+    background: linear-gradient(135deg, #FFFFFF 0%, #f8f9fa 100%);
+    padding: 0;
+    margin: 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    width: 100%;
+    overflow: hidden;
+    border: none;
+    outline: none;
+    transition: transform 0.3s ease-in-out;
+    border-bottom: 2px solid #FF9800;
+}
+
+.modern-header.navbar-hidden {
+    transform: translateY(-100%);
+}
+
+.modern-header .container {
+    max-width: 100%;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    border: none;
+}
+
+.modern-brand-section {
+    display: none; 
+}
+
+.modern-brand {
+    display: flex;
+    align-items: center;
+    color: #FF9800;
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    margin-right: 2rem;
+    text-decoration: none;
+    flex-shrink: 0;
+    border: none;
+    outline: none;
+}
+
+.modern-brand:hover {
+    color: #FFA726;
+    text-decoration: none;
+}
+
+.modern-brand:hover .logo-icon {
+    transform: scale(1.06);
+    box-shadow: 0 8px 20px rgba(255, 152, 0, 0.35);
+}
+
+.modern-brand:hover .logo-icon::after {
+    transform: scale(1.08);
+}
+
+.logo-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #FF9800 0%, #FFA726 100%);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.75rem;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: white;
+    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transform-origin: center;
+}
+
+.logo-icon::after {
+    content: "🔧";
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    font-size: 1.6rem;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transform-origin: center;
+}
+
+.modern-navbar {
+    background: linear-gradient(135deg, #FFFFFF 0%, #f8f9fa 100%);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    list-style: none;
+    padding: 1.2rem 1.5rem;
+    margin: 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    overflow-x: auto;
+    white-space: nowrap;
+    max-width: 100%;
+    border: none;
+    outline: none;
+}
+
+.modern-navbar::-webkit-scrollbar {
+    height: 4px;
+}
+
+.modern-navbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.modern-navbar::-webkit-scrollbar-thumb {
+    background: #4a4a4a;
+    border-radius: 2px;
+}
+
+.navbar-item {
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin: 0 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: #495057;
+    display: flex;
+    align-items: center;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    position: relative;
+    white-space: nowrap;
+    flex-shrink: 0;
+    border: none;
+    outline: none;
+}
+
+.navbar-item i {
+    margin-right: 0.5rem;
+    font-size: 1.1rem;
+    transition: transform 0.3s ease;
+}
+
+.navbar-item:hover {
+    color: #FF9800;
+    background: rgba(255, 152, 0, 0.1);
+    transform: translateY(-2px);
+    text-decoration: none;
+}
+
+.navbar-item:hover i {
+    transform: scale(1.1);
+}
+
+
+.navbar-item.active {
+    color: #FF9800;
+    background: rgba(255, 152, 0, 0.15);
+    font-weight: 600;
+}
+
+.navbar-item.active::after {
+    display: none;
+}
+
+@media (max-width: 1024px) {
+    .modern-navbar {
+        padding: 1rem 1rem;
+        gap: 0.3rem;
+    }
+    
+    .navbar-item {
+        margin: 0 0.5rem;
+        font-size: 0.85rem;
+        padding: 0.5rem 0.8rem;
+    }
+    
+    .modern-brand {
+        font-size: 1.1rem;
+        margin-right: 1.5rem;
+    }
+    
+    .logo-icon {
+        width: 35px;
+        height: 35px;
+        font-size: 1.3rem;
+    }
+    
+    .logo-icon::after {
+        width: 14px;
+        height: 14px;
+        font-size: 0.6rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .modern-navbar {
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        padding: 0.6rem 0.8rem;
+        overflow-x: auto;
+    }
+    
+    .navbar-item {
+        margin: 0 0.3rem;
+        font-size: 0.8rem;
+        padding: 0.4rem 0.6rem;
+    }
+    
+    .navbar-item span {
+        display: none;
+    }
+    
+    .navbar-item i {
+        margin-right: 0;
+        font-size: 1.1rem;
+    }
+    
+    .modern-brand {
+        font-size: 1rem;
+        margin-right: 1rem;
+    }
+    
+    .logo-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 1.1rem;
+    }
+    
+    .logo-icon::after {
+        width: 12px;
+        height: 12px;
+        font-size: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .modern-navbar {
+        padding: 0.5rem;
+        justify-content: space-between;
+    }
+    
+    .navbar-item {
+        margin: 0;
+        padding: 0.5rem;
+        flex: 1;
+        justify-content: center;
+        max-width: calc(100% / 6);
+    }
+    
+    .modern-brand {
+        margin-right: 0.5rem;
+        font-size: 1rem;
+    }
+}
+
+@keyframes activeTab {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.navbar-item.active {
+    animation: activeTab 0.3s ease;
+}
+
+.main-wrapper {
+    padding-top: 90px;
+    min-height: calc(100vh - 90px);
+    width: 100%;
+    overflow-x: hidden;
+}
+
+.footer {
+    margin-top: auto;
+    background: #1a1a1a;
+    border-top: 1px solid #2d2d2d;
+    padding: 2rem 0;
+    color: #e2e8f0;
+    text-align: center;
+}
+
+* {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}

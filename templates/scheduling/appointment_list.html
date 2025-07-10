@@ -1,0 +1,342 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Agendamentos{% endblock title %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/calendar.css' %}">
+<link rel="stylesheet" href="{% static 'css/delete-modal.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<div class="container-fluid" style="max-width: 1400px; margin: 0 auto; padding: 2rem;">
+    <!-- Page Header -->
+    <div class="modern-content-header">
+        <div class="modern-content-title">
+            <i class="fas fa-calendar-alt me-2"></i>
+            Agendamento
+        </div>
+        <div class="modern-content-actions">
+            <a href="{% url 'scheduling:appointment_create' %}" class="modern-add-btn">
+                <i class="fas fa-plus me-1"></i> Novo Agendamento
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="modern-stats-grid">
+        <div class="modern-stat-card">
+            <div class="modern-stat-number">{{ appointments.count|default:0 }}</div>
+            <div class="modern-stat-label">Total de Agendamentos</div>
+        </div>
+        <div class="modern-stat-card stat-success">
+            <div class="modern-stat-number" id="today-count">0</div>
+            <div class="modern-stat-label">Agendamentos Hoje</div>
+        </div>
+        <div class="modern-stat-card stat-warning">
+            <div class="modern-stat-number" id="week-count">0</div>
+            <div class="modern-stat-label">Próxima Semana</div>
+        </div>
+        <div class="modern-stat-card stat-danger">
+            <div class="modern-stat-number" id="month-count">0</div>
+            <div class="modern-stat-label">Este Mês</div>
+        </div>
+    </div>
+    <!-- View Mode Toggle Switch -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="view-toggle-container">
+            <label class="toggle-switch">
+                <input type="checkbox" id="view-mode-toggle" class="toggle-input">
+                <span class="toggle-slider">
+                    <span class="toggle-option left">
+                        <i class="fas fa-calendar"></i> Calendário
+                    </span>
+                    <span class="toggle-option right">
+                        <i class="fas fa-list"></i> Lista
+                    </span>
+                </span>
+            </label>
+        </div>
+        
+        <div class="calendar-legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: #28a745;"></div>
+                <span>Concluído</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #ffc107;"></div>
+                <span>Próximas 24h</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #FF9800;"></div>
+                <span>Agendado</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar View é un código adaptado de Harmoncode: 
+    https://codepen.io/harmoncode/pen/zxGMLrK 
+    fiz alterações no css,javascript e html para padronizar ao design do site, além
+    de incluir novas funcionalidades -->
+    <!-- Calendar View -->
+    <div id="calendar-view" class="calendar-container">
+        <div class="calendar-header">
+            <div class="calendar-nav">
+                <button class="calendar-nav-btn" id="prev-month">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <h2 class="calendar-title" id="calendar-title">Janeiro 2025</h2>
+                <button class="calendar-nav-btn" id="next-month">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            <div class="calendar-nav">
+                <div class="filter-dropdown">
+                    <button class="dropdown-toggle" type="button" id="view-filter-dropdown">
+                        <span id="current-filter">Mês</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="dropdown-menu" id="filter-dropdown-menu">
+                        <a class="dropdown-item filter-option active" href="#" data-filter="month">Mês</a>
+                        <a class="dropdown-item filter-option" href="#" data-filter="week">Semana</a>
+                        <a class="dropdown-item filter-option" href="#" data-filter="day">Dia</a>
+                    </div>
+                </div>
+                <button class="calendar-nav-btn" id="today-btn">
+                    Hoje
+                </button>
+            </div>
+        </div>
+        <div class="calendar-grid" id="calendar-grid">
+        </div>
+    </div>
+
+    <!-- List View (Hidden by default) -->
+    <div id="list-view" style="display: none;">
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-lg-9">
+                <div class="modern-table-container">
+                    <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+                        <h6 class="mb-0 d-flex align-items-center gap-2">
+                            <i class="fas fa-list text-muted"></i>
+                            Lista de Agendamentos
+                        </h6>
+                        <span class="modern-badge">{{ appointments.count|default:0 }} agendamento{{ appointments.count|pluralize:"s" }}</span>
+                    </div>
+                    
+                        {% if appointments %}
+                            <div class="table-responsive">
+                                <table class="modern-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Data e Hora</th>
+                                            <th>Veículo</th>
+                                            <th>Responsável</th>
+                                            <th>Ordem de Serviço</th>
+                                            <th style="width: 60px; text-align: center;">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for appointment in appointments %}
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex flex-column">
+                                                    <strong style="color: #1e293b;">{{ appointment.data_do_agendamento|date:"d/m/Y" }}</strong>
+                                                    <small class="text-muted">{{ appointment.data_do_agendamento|time:"H:i" }}</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                {% if appointment.pk_id_carro %}
+                                                    <div class="d-flex flex-column">
+                                                        <a href="{% url 'vehicles:vehicle_detail' appointment.pk_id_carro.pk %}" class="modern-link">
+                                                            <strong>{{ appointment.pk_id_carro.marca }} {{ appointment.pk_id_carro.modelo }}</strong>
+                                                        </a>
+                                                        <small class="text-muted">Placa: {{ appointment.pk_id_carro.placa }}</small>
+                                                    </div>
+                                                {% else %}
+                                                    <span class="text-muted">Veículo não definido</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <span style="color: #374151;">{{ appointment.responsavel|default:"Não definido" }}</span>
+                                            </td>
+                                            <td>
+                                                {% if appointment.pk_id_ordem_de_servico %}
+                                                    <a href="{% url 'services:service_order_detail' appointment.pk_id_ordem_de_servico.pk %}" class="modern-link">
+                                                        #{{ appointment.pk_id_ordem_de_servico.id }}
+                                                    </a>
+                                                {% else %}
+                                                    <span class="text-muted">Não vinculado</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="actions-cell">
+                                                <div class="kebab-menu">
+                                                    <button class="kebab-btn" type="button" onclick="toggleKebabMenu(this)">
+                                                        <span class="kebab-icon"></span>
+                                                    </button>
+                                                    <div class="kebab-dropdown">
+                                                        {% if appointment.pk %}
+                                                            <a href="{% url 'scheduling:appointment_detail' appointment.pk %}" class="kebab-dropdown-item">
+                                                                <i class="fas fa-eye"></i>
+                                                                Ver Detalhes
+                                                            </a>
+                                                            <a href="{% url 'scheduling:appointment_edit' appointment.pk %}" class="kebab-dropdown-item">
+                                                                <i class="fas fa-edit"></i>
+                                                                Editar
+                                                            </a>
+                                                            <div class="kebab-dropdown-separator"></div>
+                                                            <button type="button" class="kebab-dropdown-item danger" 
+                                                                    data-bs-toggle="modal" 
+                                                                    data-bs-target="#deleteModal"
+                                                                    data-item-id="{{ appointment.pk }}"
+                                                                    data-item-name="Agendamento - {{ appointment.data_agendamento|date:'d/m/Y H:i' }} ({{ appointment.pk_id_carro.placa }})"
+                                                                    data-item-type="Agendamento">
+                                                                <i class="fas fa-trash"></i>
+                                                                Excluir
+                                                            </button>
+                                                        {% else %}
+                                                            <span class="kebab-dropdown-item text-muted">Sem ações disponíveis</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                                <h5 style="color: #6b7280;">Nenhum agendamento encontrado</h5>
+                                <p class="text-muted">Crie novos agendamentos para vê-los listados aqui.</p>
+                                <a href="{% url 'scheduling:appointment_create' %}" class="modern-add-btn">
+                                    <i class="fas fa-plus me-1"></i>
+                                    Criar Primeiro Agendamento
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+            </div>
+
+            <!-- Search Sidebar -->
+            <div class="col-lg-3">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0"><i class="fas fa-filter me-2"></i>Filtros</h6>
+                    </div>
+                    <div class="card-body">
+                        <form method="get" class="search-form">
+                            <div class="mb-3">
+                                <label for="search" class="form-label">Buscar</label>
+                                <div class="input-group">
+                                    <input type="text" 
+                                        class="form-control form-control-sm" 
+                                        id="search"
+                                        name="search" 
+                                        placeholder="Veículo, responsável..." 
+                                        value="{{ request.GET.search }}">
+                                    {% if vehicle_id and vehicle_obj %}
+                                        <input type="hidden" name="vehicle_id" value="{{ vehicle_id }}">
+                                        <span class="input-group-text bg-light text-dark" style="font-size: 0.95em; border-left: 0;">
+                                            <i class="fas fa-car me-1"></i>
+                                            {{ vehicle_obj.placa }} - {{ vehicle_obj.marca }} {{ vehicle_obj.modelo }}
+                                            <a href="{% url 'scheduling:appointment_list' %}" class="ms-2 text-danger" style="text-decoration: none; font-size: 1.1em;">&times;</a>
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="date_filter" class="form-label">Data</label>
+                                <input type="date" 
+                                    id="date_filter" 
+                                    name="date_filter" 
+                                    value="{{ request.GET.date_filter }}" 
+                                    class="form-control form-control-sm">
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-search"></i>
+                                    Buscar
+                                </button>
+                                
+                                <a href="{% url 'scheduling:appointment_list' %}" class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-times"></i>
+                                    Limpar
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Tooltip -->
+    <div id="event-tooltip" class="event-tooltip"></div>
+    
+    <!-- Appointments Data for Calendar -->
+    <div id="appointments-data" 
+         data-appointments-json='[
+         {% for appointment in appointments %}
+         {
+             "id": {{ appointment.pk }},
+             "data_do_agendamento": "{{ appointment.data_do_agendamento|date:"c" }}",
+             "responsavel": "{{ appointment.responsavel|escapejs }}",
+             "vehicle_info": "{% if appointment.pk_id_carro %}{{ appointment.pk_id_carro.marca|escapejs }} {{ appointment.pk_id_carro.modelo|escapejs }} ({{ appointment.pk_id_carro.placa|escapejs }}){% else %}Veículo N/D{% endif %}",
+             "service_order_id": {% if appointment.pk_id_ordem_de_servico %}{{ appointment.pk_id_ordem_de_servico.pk }}{% else %}null{% endif %}
+         }{% if not forloop.last %},{% endif %}
+         {% endfor %}
+         ]' style="display: none;">
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Exclusão
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center">
+                    <i class="fas fa-exclamation-triangle text-danger" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <h6>Tem certeza que deseja excluir este registro?</h6>
+                    <p class="text-muted">
+                        <strong id="itemInfo">Item</strong>
+                    </p>
+                    <div class="alert alert-warning alert-dismissible-false">
+                        <small><i class="fas fa-info-circle me-1"></i>Esta ação não pode ser desfeita.</small>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Cancelar
+                </button>
+                <form method="post" action="" style="display: inline;" id="deleteForm">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger" id="confirmDeleteBtn">
+                        <i class="fas fa-trash-alt me-1"></i>Sim, Excluir
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script src="{% static 'js/modules/calendar.js' %}"></script>
+<script src="{% static 'js/modules/delete-modal.js' %}"></script>
+{% endblock extra_js %}
+
+

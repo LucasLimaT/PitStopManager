@@ -1,0 +1,951 @@
+.dashboard-hierarchical-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 2rem;
+    grid-template-areas: 
+        "priority medium"
+        "low-zone medium";
+}
+
+.dashboard-priority-zone {
+    grid-area: priority;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.dashboard-medium-zone {
+    grid-area: medium;
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-low-zone {
+    grid-area: low-zone;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: stretch;
+}
+
+.dashboard-orders {
+    max-height: 600px;
+}
+
+.dashboard-orders .modern-card-body {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.dashboard-stock {
+    max-height: 350px;
+}
+
+.dashboard-stock .modern-card-body {
+    max-height: 250px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.dashboard-summary {
+    
+    max-height: 350px;
+}
+
+.dashboard-summary .modern-card-body {
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.dashboard-low-zone .modern-card {
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    height: 100%; 
+}
+
+.dashboard-low-zone .modern-card .modern-card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.dashboard-appointments,
+.dashboard-revenue {
+    min-height: 300px;
+    max-height: 500px;
+}
+
+.dashboard-appointments .modern-card-body,
+.dashboard-revenue .modern-card-body {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.dashboard-hierarchical-grid .modern-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-hierarchical-grid .modern-card .modern-card-header {
+    flex-shrink: 0;
+}
+
+.dashboard-hierarchical-grid .modern-card .modern-card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (max-width: 1200px) {
+    .dashboard-hierarchical-grid {
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas: 
+            "priority priority"
+            "medium low-zone";
+    }
+    
+    .dashboard-medium-zone {
+        grid-area: medium;
+    }
+    
+    .dashboard-low-zone {
+        grid-area: low-zone;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-hierarchical-grid {
+        grid-template-columns: 1fr;
+        grid-template-areas: 
+            "priority"
+            "medium"
+            "low-zone";
+    }
+    
+    .dashboard-priority-zone {
+        grid-template-columns: 1fr;
+    }
+    
+    .dashboard-low-zone {
+        grid-template-columns: 1fr;
+    }
+}
+
+.dashboard-content-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 300px !important;
+    gap: 2rem;
+    align-items: start;
+}
+
+.modern-content-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 300px !important;
+    gap: 2rem;
+    align-items: start;
+}
+
+.modern-stats-grid .modern-stat-card {
+    display: block;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.modern-stats-grid .modern-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.modern-card {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    overflow: hidden;
+    margin-bottom: 0;
+}
+
+.modern-card-header {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.modern-card-header h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    min-width: 200px;
+    justify-content: center;
+    text-align: center;
+}
+
+.modern-btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+    border-radius: 0.375rem;
+    min-height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.modern-btn-warning {
+    background: linear-gradient(135deg, #FF9800, #FFA726);
+    color: white;
+    border: none;
+    text-decoration: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.modern-btn-warning:hover {
+    background: linear-gradient(135deg, #FFA726, #FB8C00);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+    color: white;
+    text-decoration: none;
+}
+
+.modern-btn-light {
+    background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+    color: #374151;
+    border: 1px solid #d1d5db;
+    text-decoration: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.modern-btn-light:hover {
+    background: linear-gradient(135deg, #e2e8f0, #d1d5db);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(107, 114, 128, 0.2);
+    color: #374151;
+    text-decoration: none;
+}
+
+.modern-btn-lg {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    border-radius: 0.5rem;
+}
+
+.modern-card-header .modern-btn,
+.modern-card-header .modern-btn-sm,
+.modern-card-header .modern-btn-secondary,
+.modern-card-header .modern-btn-warning {
+    flex-shrink: 0;
+    align-self: center;
+}
+
+.modern-card-body {
+    padding: 1.5rem;
+}
+
+.modern-main-content {
+    grid-column: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.modern-table-responsive {
+    overflow-x: auto;
+}
+
+.modern-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.modern-table th,
+.modern-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.modern-table th {
+    background: #f8fafc;
+    font-weight: 600;
+    color: #475569;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.modern-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.modern-badge {
+    background: #e2e8f0;
+    color: #475569;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.modern-status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.modern-status-badge.status-pendente {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.modern-status-badge.status-em_andamento {
+    background: #FFF3E0;
+    color: #FF9800;
+}
+
+.modern-status-badge.status-concluida {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.modern-btn-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 0.375rem;
+    background: #f1f5f9;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid #e2e8f0;
+}
+
+.modern-btn-icon:hover {
+    background: #e2e8f0;
+    color: #475569;
+    transform: translateY(-1px);
+}
+
+.modern-empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #64748b;
+}
+
+.modern-empty-state i {
+    font-size: 3rem;
+    color: #cbd5e1;
+    margin-bottom: 1rem;
+}
+
+.modern-empty-state h4 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 0.5rem;
+}
+
+.modern-empty-state p {
+    margin-bottom: 1.5rem;
+}
+
+.low-stock-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.low-stock-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+    gap: 1rem;
+}
+
+.low-stock-item:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.product-info {
+    flex: 1;
+}
+
+.product-name {
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+
+.product-code {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.stock-info {
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stock-quantity {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: #f59e0b;
+    color: white;
+}
+
+.stock-quantity.critical {
+    background: #ef4444;
+}
+
+.stock-quantity.warning {
+    background: #f59e0b;
+}
+
+.product-action-section {
+    flex-shrink: 0;
+}
+
+.product-detail-btn {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    min-width: 32px;
+}
+
+.product-detail-btn:hover {
+    background: #FF9800;
+    border-color: #FF9800;
+    color: white;
+    transform: scale(1.05);
+    text-decoration: none;
+}
+
+.modern-appointments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.modern-appointment-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.2s ease;
+}
+
+.modern-appointment-card:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.modern-appointment-time {
+    background: #FF9800;
+    color: white;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+    min-width: 70px;
+}
+
+.modern-appointment-details {
+    flex: 1;
+}
+
+.modern-appointment-customer {
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+
+.modern-appointment-vehicle {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.modern-quick-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.modern-quick-stat {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: #f8fafc;
+    border-radius: 0.5rem;
+}
+
+.modern-quick-stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #FFF3E0;
+    color: #FF9800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+
+.modern-quick-stat-icon.success {
+    background: #ecfdf5;
+    color: #10b981;
+}
+
+.modern-quick-stat-content {
+    flex: 1;
+}
+
+.modern-quick-stat-number {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1;
+}
+
+.modern-quick-stat-label {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+
+.service-orders-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.service-order-row {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    transition: all 0.2s ease;
+}
+
+.service-order-row:hover {
+    background: #f1f5f9;
+    border-color: #FF9800;
+    box-shadow: 0 2px 8px rgba(255, 152, 0, 0.1);
+}
+
+.order-header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.order-id-section {
+    font-size: 0.9rem;
+    color: #1e293b;
+    font-weight: 600;
+}
+
+.order-status-section {
+    flex-shrink: 0;
+}
+
+.status-indicator {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.status-indicator.status-pendente {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-indicator.status-em_andamento {
+    background: #FFF3E0;
+    color: #FF9800;
+}
+
+.status-indicator.status-concluida {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-indicator.status-entregue {
+    background: #e0e7ff;
+    color: #5b21b6;
+}
+
+.status-indicator.status-cancelada {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.order-content-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.customer-vehicle-section {
+    flex: 1;
+    min-width: 200px;
+}
+
+.customer-info,
+.vehicle-info {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-bottom: 0.25rem;
+    font-size: 0.85rem;
+}
+
+.customer-info {
+    color: #1e293b;
+}
+
+.vehicle-info {
+    color: #64748b;
+}
+
+.order-financial-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+    flex-shrink: 0;
+    min-width: 100px;
+}
+
+.order-amount {
+    font-size: 0.9rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.order-entry-date {
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.order-action-section {
+    flex-shrink: 0;
+}
+
+.order-detail-btn {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    min-width: 32px;
+}
+
+.order-detail-btn:hover {
+    background: #FF9800;
+    border-color: #FF9800;
+    color: white;
+    transform: scale(1.05);
+    text-decoration: none;
+}
+
+@media (max-width: 768px) {
+    .order-content-section {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+    }
+    
+    .order-financial-section {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .order-action-section {
+        align-self: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .modern-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .modern-card-header {
+        padding: 1rem;
+    }
+    
+    .modern-card-body {
+        padding: 1rem;
+    }
+}
+
+.revenue-history {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.revenue-month-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: #f8fafc;
+    border-radius: 0.375rem;
+    border: 1px solid #e2e8f0;
+    transition: background-color 0.2s ease;
+}
+
+.revenue-month-item:hover {
+    background: #f1f5f9;
+}
+
+.revenue-month {
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.revenue-amount {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #059669;
+}
+
+@media (max-width: 1024px) {
+    .modern-content-grid,
+    .dashboard-content-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .modern-sidebar {
+        order: -1;
+    }
+    
+    
+    .dashboard-hierarchical-grid {
+        grid-template-columns: 1fr;
+        grid-template-areas: 
+            "priority"
+            "medium"
+            "low-zone";
+    }
+    
+    .dashboard-priority-zone {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .dashboard-low-zone {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .modern-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .modern-stats-grid .modern-stat-card {
+        padding: 1rem;
+    }
+    
+    
+    .dashboard-hierarchical-grid {
+        grid-template-columns: 1fr;
+        grid-template-areas: 
+            "priority"
+            "medium"
+            "low-zone";
+    }
+    
+    .dashboard-priority-zone {
+        grid-template-columns: 1fr;
+    }
+    
+    .dashboard-low-zone {
+        grid-template-columns: 1fr;
+    }
+    
+    
+    .dashboard-orders,
+    .dashboard-stock,
+    .dashboard-summary,
+    .dashboard-appointments,
+    .dashboard-revenue {
+        max-height: none;
+    }
+    
+    .dashboard-orders .modern-card-body,
+    .dashboard-stock .modern-card-body,
+    .dashboard-summary .modern-card-body,
+    .dashboard-appointments .modern-card-body,
+    .dashboard-revenue .modern-card-body {
+        max-height: none;
+    }
+    
+    .low-stock-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+    }
+    
+    .stock-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .product-action-section {
+        align-self: center;
+    }
+    
+    .modern-appointment-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .modern-appointment-time {
+        align-self: flex-start;
+    }
+    
+    
+    .modern-card-header {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .modern-card-header h3 {
+        min-width: auto;
+        justify-content: center;
+        text-align: center;
+    }
+    
+    .modern-card-header .modern-btn,
+    .modern-card-header .modern-btn-sm,
+    .modern-card-header .modern-btn-secondary,
+    .modern-card-header .modern-btn-warning {
+        width: auto;
+        min-width: 120px;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .modern-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .modern-card-header {
+        padding: 1rem;
+    }
+    
+    .modern-card-body {
+        padding: 1rem;
+    }
+}
+
+.modern-main-content .modern-card:first-child,
+.modern-sidebar .modern-card:first-child {
+    margin-top: 0;
+    margin-bottom: 0;
+    vertical-align: top;
+}
+
+.modern-main-content .modern-card {
+    margin-bottom: 0;
+}
+
+.modern-sidebar .modern-card {
+    margin-bottom: 0;
+}
+
+.modern-content-grid .modern-main-content .modern-card:first-child {
+    position: relative;
+    top: 0;
+    transform: translateY(0);
+}
+
+.modern-content-grid .modern-sidebar .modern-card:first-child {
+    position: relative;
+    top: 0;
+    transform: translateY(0);
+}
+
+.modern-content-grid > * {
+    margin: 0;
+    padding: 0;
+    vertical-align: baseline;
+}

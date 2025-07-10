@@ -1,0 +1,394 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}PitStop Manager - Gestão de Estoque{% endblock title %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/calendar.css' %}">
+<link rel="stylesheet" href="{% static 'css/inventory.css' %}">
+<link rel="stylesheet" href="{% static 'css/delete-modal.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<div class="container-fluid" style="max-width: 1400px; margin: 0 auto; padding: 2rem;">
+    <!-- Page Header -->
+    <div class="modern-content-header">
+        <div class="modern-content-title">
+            <i class="fas fa-dolly me-2"></i>
+            Gestão de Estoque
+        </div>
+        <div class="modern-content-actions">
+            <a href="{% url 'inventory:product_create' %}" class="modern-add-btn">
+                <i class="fas fa-plus me-1"></i> 
+                Novo Produto
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="modern-stats-grid">
+        <div class="modern-stat-card">
+            <div class="modern-stat-number">{{ products.count|default:0 }}</div>
+            <div class="modern-stat-label">Total de Produtos</div>
+        </div>
+        <div class="modern-stat-card stat-success">
+            <div class="modern-stat-number">{{ total_stock|default:0 }}</div>
+            <div class="modern-stat-label">Unidades em Estoque</div>
+        </div>
+        <div class="modern-stat-card stat-warning">
+            <div class="modern-stat-number">{{ low_stock_count|default:0 }}</div>
+            <div class="modern-stat-label">Estoque Baixo</div>
+        </div>
+        <div class="modern-stat-card stat-danger">
+            <div class="modern-stat-number">{{ out_of_stock_count|default:0 }}</div>
+            <div class="modern-stat-label">Sem Estoque</div>
+        </div>
+    </div>
+
+    <!-- View Mode Toggle Switch -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="view-toggle-container">
+            <label class="toggle-switch">
+                <input type="checkbox" id="view-mode-toggle" class="toggle-input">
+                <span class="toggle-slider">
+                    <span class="toggle-option left">
+                        <i class="fas fa-th-large"></i> Cards
+                    </span>
+                    <span class="toggle-option right">
+                        <i class="fas fa-list"></i> Lista
+                    </span>
+                </span>
+            </label>
+        </div>
+    </div>
+
+    <!-- Card View -->
+    <div id="card-view" class="modern-content-grid" style="display: grid;">
+        <!-- Sidebar -->
+        <div class="modern-sidebar">
+            <h3>🔍 Pesquisar Produtos</h3>
+            <form method="get" class="modern-search-form">
+                {% if current_filter %}
+                    <input type="hidden" name="filter" value="{{ current_filter }}">
+                {% endif %}
+                <input type="text" 
+                       class="modern-search-box" 
+                       name="search" 
+                       value="{{ request.GET.search }}"
+                       placeholder="Digite o nome do produto...">
+                <button type="submit" class="modern-btn modern-btn-primary">
+                    <i class="fas fa-search"></i> Pesquisar
+                </button>
+            </form>
+            
+            <h3 style="margin-top: 2rem;">Filtros</h3>
+            <div class="modern-filter-buttons">
+                <a href="{% url 'inventory:product_list' %}" 
+                   class="modern-filter-btn {% if not current_filter and not request.GET.search %}active{% endif %}">
+                    Todos os Produtos
+                </a>
+                <a href="?filter=normal{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" 
+                   class="modern-filter-btn {% if current_filter == 'normal' %}active{% endif %}">
+                    Estoque Normal
+                </a>
+                <a href="?filter=low{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" 
+                   class="modern-filter-btn {% if current_filter == 'low' %}active{% endif %}">
+                    Estoque Baixo
+                </a>
+                <a href="?filter=out{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" 
+                   class="modern-filter-btn {% if current_filter == 'out' %}active{% endif %}">
+                    Sem Estoque
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="modern-main-content">
+            <div class="modern-content-header">
+                <h2>Lista de Produtos</h2>
+            </div>
+
+            {% if products %}
+                <div class="modern-products-grid">
+                    {% for product in products %}
+                    <div class="modern-product-card">
+                        <div class="modern-product-header">
+                            <div>
+                                <h3 class="modern-product-name">{{ product.nome }}</h3>
+                                {% if product.descricao %}
+                                <div class="modern-product-description">{{ product.descricao|truncatechars:50 }}</div>
+                                {% endif %}
+                            </div>
+                            <div>
+                                {% if product.estoque <= 0 %}
+                                    <span class="modern-stock-badge modern-stock-out">Sem Estoque</span>
+                                {% elif product.estoque <= 5 %}
+                                    <span class="modern-stock-badge modern-stock-low">Baixo</span>
+                                {% else %}
+                                    <span class="modern-stock-badge modern-stock-normal">Normal</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="modern-stock-info">
+                            <div class="modern-stock-number">{{ product.estoque }}</div>
+                            <div class="modern-stock-label">unidades</div>
+                        </div>
+
+                        <div class="modern-action-buttons">
+                            <a href="{% url 'inventory:product_detail' product.pk %}" 
+                               class="modern-action-btn modern-btn-view" 
+                               title="Visualizar">
+                                Ver
+                            </a>
+                            <a href="{% url 'inventory:product_edit' product.pk %}" 
+                               class="modern-action-btn modern-btn-edit" 
+                               title="Editar">
+                                Editar
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if is_paginated %}
+                <nav aria-label="Paginação">
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                                    Primeira
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                                    Anterior
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_obj.number }}</span>
+                        </li>
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                                    Próxima
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                                    Última
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            {% else %}
+                <div class="modern-empty-state">
+                    <div class="modern-empty-icon">📦</div>
+                    <h3 class="modern-empty-title">Nenhum produto encontrado</h3>
+                    {% if request.GET.search %}
+                        <p class="modern-empty-text">
+                            Não encontramos produtos com o termo "<strong>{{ request.GET.search }}</strong>".<br>
+                            Tente ajustar sua pesquisa ou <a href="{% url 'inventory:product_list' %}">ver todos os produtos</a>.
+                        </p>
+                    {% else %}
+                        <p class="modern-empty-text">
+                            Você ainda não cadastrou nenhum produto em seu estoque.<br>
+                            Comece adicionando os primeiros itens para uma gestão eficiente.
+                        </p>
+                        <a href="{% url 'inventory:product_create' %}" class="modern-add-btn">
+                            ➕ Adicionar Primeiro Produto
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- List View (Hidden by default) -->
+    <div id="list-view" style="display: none;">
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-lg-9">
+                <div class="modern-table-container">
+                    <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+                        <h6 class="mb-0 d-flex align-items-center gap-2">
+                            <i class="fas fa-list text-muted"></i>
+                            Lista de Produtos
+                        </h6>
+                        <span class="modern-badge">{{ products.count|default:0 }} produto{{ products.count|pluralize:"s" }}</span>
+                    </div>
+                    
+                    {% if products %}
+                        <div class="table-responsive">
+                            <table class="modern-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Estoque</th>
+                                        <th>Status</th>
+                                        <th style="width: 60px; text-align: center;">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for product in products %}
+                                    <tr>
+                                        <td>
+                                            <strong style="color: #1e293b;">{{ product.nome }}</strong>
+                                        </td>
+                                        <td>
+                                            <span style="color: #374151; font-weight: 500;">{{ product.estoque }} unidades</span>
+                                        </td>
+                                        <td>
+                                            {% if product.estoque == 0 %}
+                                                <span class="badge bg-danger">Sem Estoque</span>
+                                            {% elif product.estoque <= 5 %}
+                                                <span class="badge bg-warning">Estoque Baixo</span>
+                                            {% else %}
+                                                <span class="badge bg-success">Estoque Normal</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="actions-cell">
+                                            <div class="kebab-menu">
+                                                <button class="kebab-btn" type="button" onclick="toggleKebabMenu(this)">
+                                                    <span class="kebab-icon"></span>
+                                                </button>
+                                                <div class="kebab-dropdown">
+                                                    <a href="{% url 'inventory:product_detail' product.pk %}" class="kebab-dropdown-item">
+                                                        <i class="fas fa-eye"></i>
+                                                        Ver Detalhes
+                                                    </a>
+                                                    <a href="{% url 'inventory:product_edit' product.pk %}" class="kebab-dropdown-item">
+                                                        <i class="fas fa-edit"></i>
+                                                        Editar
+                                                    </a>
+                                                    <div class="kebab-dropdown-separator"></div>
+                                                    <button type="button" class="kebab-dropdown-item danger" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#deleteModal"
+                                                            data-item-id="{{ product.pk }}"
+                                                            data-item-name="{{ product.nome }}"
+                                                            data-item-type="Produto">
+                                                        <i class="fas fa-trash"></i>
+                                                        Excluir
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                            <h5 style="color: #6b7280;">Nenhum produto encontrado</h5>
+                            <p class="text-muted">Cadastre novos produtos para vê-los listados aqui.</p>
+                            <a href="{% url 'inventory:product_create' %}" class="modern-add-btn">
+                                <i class="fas fa-plus me-1"></i>
+                                Cadastrar Primeiro Produto
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Search Sidebar -->
+            <div class="col-lg-3">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0"><i class="fas fa-filter me-2"></i>Filtros</h6>
+                    </div>
+                    <div class="card-body">
+                        <form method="get" class="search-form">
+                            <div class="mb-3">
+                                <label for="search" class="form-label">Buscar</label>
+                                <input type="text" 
+                                    class="form-control form-control-sm" 
+                                    id="search"
+                                    name="search" 
+                                    placeholder="Nome do produto..." 
+                                    value="{{ request.GET.search }}">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="filter" class="form-label">Estoque</label>
+                                <select name="filter" id="filter" class="form-control form-control-sm">
+                                    <option value="">Todos</option>
+                                    <option value="normal" {% if current_filter == 'normal' %}selected{% endif %}>Estoque Normal</option>
+                                    <option value="low" {% if current_filter == 'low' %}selected{% endif %}>Estoque Baixo</option>
+                                    <option value="out" {% if current_filter == 'out' %}selected{% endif %}>Sem Estoque</option>
+                                </select>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-search"></i>
+                                    Buscar
+                                </button>
+                                {% if request.GET.search or current_filter %}
+                                    <a href="{% url 'inventory:product_list' %}" class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-times"></i>
+                                        Limpar
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Exclusão
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center">
+                    <i class="fas fa-exclamation-triangle text-danger" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <h6>Tem certeza que deseja excluir este registro?</h6>
+                    <p class="text-muted">
+                        <strong id="itemInfo">Item</strong>
+                    </p>
+                    <div class="alert alert-warning alert-dismissible-false">
+                        <small><i class="fas fa-info-circle me-1"></i>Esta ação não pode ser desfeita.</small>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Cancelar
+                </button>
+                <form method="post" action="" style="display: inline;" id="deleteForm">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger" id="confirmDeleteBtn">
+                        <i class="fas fa-trash-alt me-1"></i>Sim, Excluir
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script src="{% static 'js/modules/delete-modal.js' %}"></script>
+<script src="{% static 'js/modules/kebab-menu.js' %}"></script>
+<script src="{% static 'js/modules/inventory.js' %}"></script>
+{% endblock extra_js %}

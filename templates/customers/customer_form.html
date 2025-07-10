@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block title %}
+    {% if form.instance.pk %}
+        Editar Cliente
+    {% else %}
+        Adicionar Cliente
+    {% endif %}
+{% endblock title %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="modern-card">
+        <div class="modern-card-header">
+            <h2 class="h5 mb-0">
+                {% if form.instance.pk %}
+                    Editar Cliente: {{ form.instance.nome }}
+                {% else %}
+                    Adicionar Novo Cliente
+                {% endif %}
+            </h2>
+        </div>
+        <div class="modern-card-body">
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="modern-alert modern-alert-danger">
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.nome.id_for_label }}" class="form-label">{{ form.nome.label }}</label>
+                        {% render_field form.nome class="form-control" placeholder="Digite o nome completo" %}
+                        {% if form.nome.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.nome.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ form.telefone.id_for_label }}" class="form-label">{{ form.telefone.label }}</label>
+                        {% render_field form.telefone class="form-control" placeholder="(XX) XXXXX-XXXX" %}
+                        {% if form.telefone.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.telefone.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a href="{% url 'customers:customer_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> 
+                        {% if form.instance.pk %}Atualizar Cliente{% else %}Salvar Cliente{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock content %}

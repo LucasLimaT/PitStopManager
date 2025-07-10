@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% load static %}
+
+{% block title %}Agendamento #{{ appointment.pk }} - Detalhes do Agendamento{% endblock title %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/inventory.css' %}">
+<link rel="stylesheet" href="{% static 'css/delete-modal.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<div class="container-fluid" style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
+    <!-- Informações do Agendamento -->
+    <div class="product-info-card">
+        <div class="product-info-header">
+            <h3><i class="fas fa-calendar-alt"></i> Informações do Agendamento</h3>
+            <div class="header-actions">
+                <a href="{% url 'scheduling:appointment_edit' appointment.pk %}" class="header-action-btn">
+                    <i class="fas fa-edit"></i> Editar
+                </a>
+                <button type="button" class="header-action-btn delete" data-bs-toggle="modal" data-bs-target="#deleteModal"
+                        data-item-id="{{ appointment.pk }}"
+                        data-item-name="Agendamento - {{ appointment.data_agendamento|date:'d/m/Y H:i' }} ({{ appointment.pk_id_carro.placa }})"
+                        data-item-type="Agendamento">
+                    <i class="fas fa-trash-alt"></i> Excluir
+                </button>
+            </div>
+        </div>
+        <div class="product-info-body">
+            {% if appointment %}
+                <div class="info-item">
+                    <span class="info-label">
+                        <i class="fas fa-hashtag"></i> ID do Agendamento
+                    </span>
+                    <span class="info-value">
+                        <span class="badge bg-primary">#{{ appointment.pk|stringformat:"04d" }}</span>
+                    </span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">
+                        <i class="fas fa-car"></i> Veículo
+                    </span>
+                    <span class="info-value">
+                        {% if appointment.pk_id_carro %}
+                            <a href="{% url 'vehicles:vehicle_detail' appointment.pk_id_carro.pk %}" class="text-decoration-none">
+                                {{ appointment.pk_id_carro.marca }} {{ appointment.pk_id_carro.modelo }} ({{ appointment.pk_id_carro.placa }})
+                            </a>
+                        {% else %}
+                            Não informado
+                        {% endif %}
+                    </span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">
+                        <i class="fas fa-user"></i> Cliente
+                    </span>
+                    <span class="info-value">
+                        {% if appointment.pk_id_carro.pk_id_cliente %}
+                            <a href="{% url 'customers:customer_detail' appointment.pk_id_carro.pk_id_cliente.pk %}" class="text-decoration-none">
+                                {{ appointment.pk_id_carro.pk_id_cliente.nome }}
+                            </a>
+                        {% else %}
+                            Não informado
+                        {% endif %}
+                    </span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">
+                        <i class="fas fa-wrench"></i> Ordem de Serviço
+                    </span>
+                    <span class="info-value">
+                        {% if appointment.pk_id_ordem_de_servico %}
+                            <a href="{% url 'services:service_order_detail' appointment.pk_id_ordem_de_servico.pk %}" class="text-decoration-none">
+                                Ordem #{{ appointment.pk_id_ordem_de_servico.pk|stringformat:"04d" }}
+                            </a>
+                        {% else %}
+                            Não vinculado
+                        {% endif %}
+                    </span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">
+                        <i class="fas fa-user-cog"></i> Responsável
+                    </span>
+                    <span class="info-value">{{ appointment.responsavel|default:"Não atribuído" }}</span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">
+                        <i class="fas fa-calendar-check"></i> Data e Hora do Agendamento
+                    </span>
+                    <span class="info-value">
+                        <span class="stock-status stock-good">
+                            {{ appointment.data_do_agendamento|date:"d/m/Y H:i"|default:"Não agendado" }}
+                        </span>
+                    </span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">
+                        <i class="fas fa-calendar-plus"></i> Data de Criação
+                    </span>
+                    <span class="info-value">{{ appointment.created_at|date:"d/m/Y H:i"|default:"Não informado" }}</span>
+                </div>
+                
+                <div class="info-item">
+                    <span class="info-label">
+                        <i class="fas fa-sync-alt"></i> Última Atualização
+                    </span>
+                    <span class="info-value">{{ appointment.updated_at|date:"d/m/Y H:i"|default:"Não informado" }}</span>
+                </div>
+            {% else %}
+                <div class="info-item">
+                    <span class="info-label">
+                        <i class="fas fa-exclamation-triangle"></i> Status
+                    </span>
+                    <span class="info-value">
+                        <span class="stock-status stock-out">Informações do agendamento não disponíveis</span>
+                    </span>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Botão de Voltar -->
+    <div style="margin-top: 2rem; text-align: center;">
+        <a href="{% url 'scheduling:appointment_list' %}" class="header-action-btn" style="font-size: 1.1rem; padding: 12px 24px;">
+            <i class="fas fa-arrow-left"></i> Voltar para Lista de Agendamentos
+        </a>
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Exclusão
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center">
+                    <i class="fas fa-exclamation-triangle text-danger" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <h6>Tem certeza que deseja excluir este registro?</h6>
+                    <p class="text-muted">
+                        <strong id="itemInfo">Item</strong>
+                    </p>
+                    <div class="alert alert-warning alert-dismissible-false">
+                        <small><i class="fas fa-info-circle me-1"></i>Esta ação não pode ser desfeita.</small>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Cancelar
+                </button>
+                <form method="post" action="" style="display: inline;" id="deleteForm">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger" id="confirmDeleteBtn">
+                        <i class="fas fa-trash-alt me-1"></i>Sim, Excluir
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/modules/delete-modal.js' %}"></script>
+{% endblock extra_js %}
